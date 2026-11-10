@@ -1,65 +1,138 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { User, Lock, Eye, EyeOff, Headset } from "lucide-react";
+
+export default function LoginCard() {
+  const router = useRouter();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error ?? "Gagal masuk");
+        return;
+      }
+      router.push("/dashboard");
+    } catch {
+      setError("Tidak bisa terhubung ke server");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+    <div className="flex min-h-screen flex-col items-center justify-center bg-[#f4f4f4] px-4">
+      <div className="w-full max-w-[348px] rounded-3xl border border-neutral-200 bg-white px-9 pb-8 pt-9">
+        <p className="text-center text-sm font-medium text-neutral-500">
+          Space Creative
+        </p>
+
+        <h1 className="mt-9 text-center text-[22px] font-bold text-black">
+          Masuk ke Space Creative
+        </h1>
+        <p className="mx-auto mt-1 max-w-[240px] text-center text-[13px] leading-snug text-neutral-500">
+          Masukkan username dan password untuk melanjutkan
+        </p>
+
+        <form onSubmit={handleSubmit} className="mt-7 flex flex-col gap-3">
+          <div className="relative">
+            <User
+              size={14}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Username"
+              className="h-[34px] w-full rounded-lg border border-neutral-200 pl-9 pr-3 text-sm outline-none placeholder:text-neutral-400 focus:border-neutral-400"
+            />
+          </div>
+
+          <div className="relative">
+            <Lock
+              size={14}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500"
+            />
+            <input
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              className="h-[34px] w-full rounded-lg border border-neutral-200 pl-9 pr-9 text-sm outline-none placeholder:text-neutral-400 focus:border-neutral-400"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500"
+            >
+              {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+            </button>
+          </div>
+
+          <div className="flex items-center justify-between text-xs">
+            <label className="flex cursor-pointer items-center gap-1.5 text-neutral-600">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="size-3 accent-black"
+              />
+              Ingat saya
+            </label>
+            <a href="#" className="text-blue-800 underline">
+              Lupa password?
+            </a>
+          </div>
+
+          {error && <p className="text-xs text-red-600">{error}</p>}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="mt-1 h-[34px] w-full rounded-lg bg-black text-xs font-medium text-white transition hover:bg-neutral-800 disabled:opacity-60"
           >
-            Documentation
-          </a>
+            {loading ? "Memproses..." : "Masuk"}
+          </button>
+        </form>
+
+        <div className="my-4 flex items-center gap-3">
+          <span className="h-px flex-1 bg-neutral-200" />
+          <span className="text-[11px] text-neutral-400">atau</span>
+          <span className="h-px flex-1 bg-neutral-200" />
         </div>
-      </main>
+
+        <button
+          type="button"
+          className="flex h-[28px] w-full items-center justify-center gap-2 rounded-md border border-neutral-200 bg-white text-xs font-semibold text-black transition hover:bg-neutral-50"
+        >
+          <Headset size={13} />
+          Hubungi admin
+        </button>
+      </div>
+
+      <p className="mt-2 text-xs text-neutral-500">
+        © 2026 Space Creative. All rights reserved.
+      </p>
     </div>
   );
 }
